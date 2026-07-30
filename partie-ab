@@ -1,7 +1,4 @@
-import { FlashCard } from '../../../types'
-
-export const greekVerbsS1: FlashCard[] = [
-  { id: 'greek-v-1-1', question: 'είμαι', article: '', answer: 'être', greekWord: 'είμαι', singular: 'είμαι', plural: 'είμαστε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 1, mastery: 0, lastReviewed: null, nextReview: new Date() },
+�μαστε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 1, mastery: 0, lastReviewed: null, nextReview: new Date() },
   { id: 'greek-v-1-2', question: 'έχω', article: '', answer: 'avoir', greekWord: 'έχω', singular: 'έχω', plural: 'έχουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 1, mastery: 0, lastReviewed: null, nextReview: new Date() },
   { id: 'greek-v-1-3', question: 'κάνω', article: '', answer: 'faire', greekWord: 'κάνω', singular: 'κάνω', plural: 'κάνουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
   { id: 'greek-v-1-4', question: 'πάω', article: '', answer: 'aller', greekWord: 'πάω', singular: 'πάω', plural: 'πάμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
@@ -36,20 +33,142 @@ export const greekVerbsS2: FlashCard[] = [
   { id: 'greek-v-2-15', question: 'επιστρέφω', article: '', answer: 'revenir', greekWord: 'επιστρέφω', singular: 'επιστρέφω', plural: 'επιστρέφουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() }
 ]
 
-export const greekVerbsS3: FlashCard[] = [
-  { id: 'greek-v-3-1', question: 'γράφω', article: '', answer: 'écrire', greekWord: 'γράφω', singular: 'γράφω', plural: 'γράφουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-2', question: 'διαβάζω', article: '', answer: 'lire', greekWord: 'διαβάζω', singular: 'διαβάζω', plural: 'διαβάζουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-3', question: 'ακούω', article: '', answer: 'écouter', greekWord: 'ακούω', singular: 'ακούω', plural: 'ακούμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-4', question: 'απαντάω', article: '', answer: 'répondre', greekWord: 'απαντάω', singular: 'απαντάω', plural: 'απαντάμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-5', question: 'ρωτάω', article: '', answer: 'demander', greekWord: 'ρωτάω', singular: 'ρωτάω', plural: 'ρωτάμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-6', question: 'εξηγώ', article: '', answer: 'expliquer', greekWord: 'εξηγώ', singular: 'εξηγώ', plural: 'εξηγούμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-7', question: 'διηγούμαι', article: '', answer: 'raconter', greekWord: 'διηγούμαι', singular: 'διηγούμαι', plural: 'διηγούμαστε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-8', question: 'τηλεφωνώ', article: '', answer: 'appeler', greekWord: 'τηλεφωνώ', singular: 'τηλεφωνώ', plural: 'τηλεφωνούμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-9', question: 'φωνάζω', article: '', answer: 'crier', greekWord: 'φωνάζω', singular: 'φωνάζω', plural: 'φωνάζουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-10', question: 'ψιθυρίζω', article: '', answer: 'chuchoter', greekWord: 'ψιθυρίζω', singular: 'ψιθυρίζω', plural: 'ψιθυρίζουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-11', question: 'μεταφράζω', article: '', answer: 'traduire', greekWord: 'μεταφράζω', singular: 'μεταφράζω', plural: 'μεταφράζουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-12', question: 'επαναλαμβάνω', article: '', answer: 'répéter', greekWord: 'επαναλαμβάνω', singular: 'επαναλαμβάνω', plural: 'επαναλαμβάνουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-13', question: 'υπόσχομαι', article: '', answer: 'promettre', greekWord: 'υπόσχομαι', singular: 'υπόσχομαι', plural: 'υποσχόμαστε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-14', question: 'συμβουλεύω', article: '', answer: 'conseiller', greekWord: 'συμβουλεύω', singular: 'συμβουλεύω', plural: 'συμβουλεύουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
-  { id: 'greek-v-3-15', question: 'ανακοινώνω', article: '', answer: 'annoncer', greekWord: 'ανακοινώνω', singular: 'ανακοινώνω', plural: 'ανακοινώνουμε', subject: 'greek', category: 'greek-verbs', series: 3, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() }
-]
+
+========== src/data/allCards.ts ==========
+
+import { greekVerbs, greekAdjectives, greekNouns } from './greek'
+
+export const allCards = [...greekVerbs, ...greekAdjectives, ...greekNouns]
+
+
+========== src/pages/SubjectPage.tsx ==========
+
+import { useParams, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowLeft, Lock } from 'lucide-react'
+import Header from '../components/Header'
+import { subjects } from '../data/subjects'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function SubjectPage() {
+  const { subjectId } = useParams<{ subjectId: string }>()
+  const playClick = useClickSound()
+  const subject = subjects.find(s => s.id === subjectId)
+  if (!subject) return <div>Matiere non trouvee</div>
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-4xl mx-auto px-6 py-8'>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='mb-8'>
+          <Link to='/' onClick={playClick} className='inline-flex items-center gap-2 text-learn-500 hover:text-learn-700 transition-colors mb-4'>
+            <ArrowLeft className='w-4 h-4' />
+            <span className='text-sm'>Retour</span>
+          </Link>
+          <h1 className='font-display text-3xl font-bold text-learn-900'>{subject.name}</h1>
+          <p className='text-learn-500 mt-2'>{subject.description}</p>
+        </motion.div>
+
+        {subject.categories.length > 0 ? (
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {subject.categories.map((category, index) => (
+              <motion.div key={category.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+                <Link to={'/study/' + subject.id + '/' + category.id} onClick={playClick}
+                  className='block p-6 bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all border border-learn-200 hover:border-learn-300'>
+                  <div className='flex items-center justify-between'>
+                    <div>
+                      <h3 className='font-semibold text-lg text-learn-800'>{category.name}</h3>
+                      <p className='text-sm text-learn-500 mt-1'>{category.description}</p>
+                      <p className='text-xs text-learn-400 mt-3'>{category.cardCount} cartes</p>
+                    </div>
+                    <div className='w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-semibold' style={{ backgroundColor: subject.color }}>
+                      {category.cardCount}
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className='text-center py-16'>
+            <Lock className='w-12 h-12 text-learn-300 mx-auto mb-4' />
+            <p className='text-learn-500'>Cette matiere sera bientot disponible</p>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/StudyPage.tsx ==========
+
+import { useState, useCallback, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import Header from '../components/Header'
+import FlashCardComponent from '../components/FlashCard'
+import { allCards } from '../data/allCards'
+import { selectCardsForSession, calculateNextReview } from '../engine/algorithm'
+import { saveCard } from '../engine/storage'
+import { FlashCard, ReviewResult } from '../types'
+
+export default function StudyPage() {
+  const { subjectId, categoryId } = useParams<{ subjectId: string; categoryId: string }>()
+  const navigate = useNavigate()
+  const [cards, setCards] = useState<FlashCard[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [sessionComplete, setSessionComplete] = useState(false)
+  const [stats, setStats] = useState({ correct: 0, review: 0, wrong: 0 })
+
+  useEffect(() => {
+    const categoryCards = allCards.filter(c => c.category === categoryId)
+    const sessionCards = selectCardsForSession(categoryCards, categoryId!, 10)
+    setCards(sessionCards)
+  }, [categoryId])
+
+  const handleResult = useCallback((result: ReviewResult) => {
+    const currentCard = cards[currentIndex]
+    if (!currentCard) return
+    const updatedCard = calculateNextReview(currentCard, result)
+    saveCard(updatedCard)
+    setStats(prev => ({
+      correct: prev.correct + (result === 'correct' ? 1 : 0),
+      review: prev.review + (result === 'review' ? 1 : 0),
+      wrong: prev.wrong + (result === 'wrong' ? 1 : 0)
+    }))
+    if (currentIndex >= cards.length - 1) {
+      setSessionComplete(true)
+    } else {
+      setCurrentIndex(prev => prev + 1)
+    }
+  }, [cards, currentIndex])
+
+  const handleRestart = () => {
+    const categoryCards = allCards.filter(c => c.category === categoryId)
+    const sessionCards = selectCardsForSession(categoryCards, categoryId!, 10)
+    setCards(sessionCards)
+    setCurrentIndex(0)
+    setSessionComplete(false)
+    setStats({ correct: 0, review: 0, wrong: 0 })
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <p className='text-learn-500'>Chargement...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-2xl mx-auto px-6 py-8'>
+        {!sessionComplete ? (
+          <>
+            <div className='flex items-center justify-between mb-8'>
+              <span className='text-sm text-learn-500'>
+                Carte {currentIndex + 1} / {cards.length}
+              </span>
+              <div className='flex-1 mx-4 h-2 bg-

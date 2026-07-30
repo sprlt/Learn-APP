@@ -1,0 +1,394 @@
+learn-200 rounded-full overflow-hidden'>
+                <motion.div 
+                  className='h-full bg-learn-600 rounded-full'
+                  initial={{ width: 0 }}
+                  animate={{ width: ((currentIndex) / cards.length) * 100 + '%' }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            </div>
+
+            <AnimatePresence mode='wait'>
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.25 }}
+              >
+                <FlashCardComponent 
+                  card={cards[currentIndex]} 
+                  onResult={handleResult}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className='text-center py-16'
+          >
+            <div className='w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6'>
+              <svg width='32' height='32' viewBox='0 0 20 20' fill='none'>
+                <path d='M4 10L8 14L16 6' stroke='#059669' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'/>
+              </svg>
+            </div>
+            
+            <h2 className='font-display text-2xl font-bold text-learn-900 mb-2'>
+              Session terminee !
+            </h2>
+            <p className='text-learn-500 mb-8'>Voici vos resultats</p>
+
+            <div className='grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8'>
+              <div className='p-4 bg-emerald-50 rounded-2xl'>
+                <p className='text-2xl font-bold text-emerald-600'>{stats.correct}</p>
+                <p className='text-xs text-emerald-500 mt-1'>Connus</p>
+              </div>
+              <div className='p-4 bg-amber-50 rounded-2xl'>
+                <p className='text-2xl font-bold text-amber-600'>{stats.review}</p>
+                <p className='text-xs text-amber-500 mt-1'>A revoir</p>
+              </div>
+              <div className='p-4 bg-red-50 rounded-2xl'>
+                <p className='text-2xl font-bold text-red-600'>{stats.wrong}</p>
+                <p className='text-xs text-red-500 mt-1'>Difficiles</p>
+              </div>
+            </div>
+
+            <div className='flex gap-3 justify-center'>
+              <button
+                onClick={() => navigate('/subject/' + subjectId)}
+                className='px-6 py-3 rounded-xl bg-learn-100 text-learn-700 font-medium hover:bg-learn-200 transition-colors'
+              >
+                Retour
+              </button>
+              <button
+                onClick={handleRestart}
+                className='px-6 py-3 rounded-xl bg-learn-800 text-white font-medium hover:bg-learn-700 transition-colors'
+              >
+                Nouvelle session
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/ProgressPage.tsx ==========
+
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowLeft, TrendingUp } from 'lucide-react'
+import Header from '../components/Header'
+import { getStoredData } from '../engine/storage'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function ProgressPage() {
+  const playClick = useClickSound()
+  const data = getStoredData()
+
+  const totalCards = data.cards.length
+  const masteredCards = data.cards.filter(c => c.mastery >= 4).length
+  const averageMastery = totalCards > 0 
+    ? (data.cards.reduce((sum, c) => sum + c.mastery, 0) / totalCards).toFixed(1)
+    : '0'
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-4xl mx-auto px-6 py-8'>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <Link to='/' onClick={playClick} className='inline-flex items-center gap-2 text-learn-500 hover:text-learn-700 transition-colors mb-4'>
+            <ArrowLeft className='w-4 h-4' />
+            <span className='text-sm'>Retour</span>
+          </Link>
+
+          <h1 className='font-display text-3xl font-bold text-learn-900 mb-8'>
+            Progression
+          </h1>
+
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
+            <div className='p-6 bg-white rounded-2xl card-shadow'>
+              <TrendingUp className='w-6 h-6 text-learn-400 mb-3' />
+              <p className='text-3xl font-bold text-learn-800'>{totalCards}</p>
+              <p className='text-sm text-learn-500 mt-1'>Cartes etudiees</p>
+            </div>
+            <div className='p-6 bg-white rounded-2xl card-shadow'>
+              <div className='w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center mb-3'>
+                <div className='w-3 h-3 rounded-full bg-emerald-500' />
+              </div>
+              <p className='text-3xl font-bold text-learn-800'>{masteredCards}</p>
+              <p className='text-sm text-learn-500 mt-1'>Cartes maitrisees</p>
+            </div>
+            <div className='p-6 bg-white rounded-2xl card-shadow'>
+              <div className='w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mb-3'>
+                <span className='text-xs font-bold text-blue-600'>{averageMastery}</span>
+              </div>
+              <p className='text-3xl font-bold text-learn-800'>{averageMastery}<span className='text-lg text-learn-400'>/5</span></p>
+              <p className='text-sm text-learn-500 mt-1'>Maitrise moyenne</p>
+            </div>
+          </div>
+
+          {totalCards > 0 && (
+            <div className='bg-white rounded-2xl card-shadow p-6'>
+              <h3 className='font-semibold text-learn-800 mb-4'>Niveau de maitrise</h3>
+              <div className='space-y-3'>
+                {[0, 1, 2, 3, 4, 5].map(level => {
+                  const count = data.cards.filter(c => c.mastery === level).length
+                  const percentage = totalCards > 0 ? (count / totalCards) * 100 : 0
+                  const labels = ['A apprendre', 'Debutant', 'En progres', 'Intermediaire', 'Avance', 'Maitrise']
+                  return (
+                    <div key={level} className='flex items-center gap-4'>
+                      <span className='text-sm text-learn-500 w-28'>{labels[level]}</span>
+                      <div className='flex-1 h-3 bg-learn-100 rounded-full overflow-hidden'>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: percentage + '%' }}
+                          transition={{ duration: 0.5, delay: level * 0.1 }}
+                          className={'h-full rounded-full ' + (
+                            level === 5 ? 'bg-emerald-500' :
+                            level >= 3 ? 'bg-blue-500' :
+                            level >= 1 ? 'bg-amber-500' : 'bg-learn-300'
+                          )}
+                        />
+                      </div>
+                      <span className='text-sm text-learn-500 w-8 text-right'>{count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {totalCards === 0 && (
+            <div className='text-center py-16'>
+              <p className='text-learn-500'>Commencez une session pour voir vos progres</p>
+            </div>
+          )}
+        </motion.div>
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/CategoryPage.tsx ==========
+
+import { useParams, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowLeft, Play } from 'lucide-react'
+import Header from '../components/Header'
+import { subjects } from '../data/subjects'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function CategoryPage() {
+  const { subjectId, categoryId } = useParams<{ subjectId: string; categoryId: string }>()
+  const playClick = useClickSound()
+  const subject = subjects.find(s => s.id === subjectId)
+  const category = subject?.categories.find(c => c.id === categoryId)
+  if (!subject || !category) return <div>Categorie non trouvee</div>
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-2xl mx-auto px-6 py-8'>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='mb-8'>
+          <Link to={'/subject/' + subjectId} onClick={playClick} className='inline-flex items-center gap-2 text-learn-500 hover:text-learn-700 transition-colors mb-4'>
+            <ArrowLeft className='w-4 h-4' />
+            <span className='text-sm'>{subject.name}</span>
+          </Link>
+          <h1 className='font-display text-3xl font-bold text-learn-900'>
+            {category.name}
+          </h1>
+          <p className='text-learn-500 mt-2'>{category.description}</p>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <Link to={'/study/' + subjectId + '/' + categoryId} onClick={playClick}
+            className='flex items-center justify-center gap-3 w-full py-4 rounded-2xl text-white font-semibold text-lg transition-transform hover:scale-[1.02] active:scale-[0.98]'
+            style={{ backgroundColor: subject.color }}>
+            <Play className='w-5 h-5' />
+            Commencer la session
+          </Link>
+          <p className='text-center text-sm text-learn-400 mt-4'>
+            10 cartes selectionnees parmi {category.cardCount}
+          </p>
+        </motion.div>
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/HomePage.tsx ==========
+
+import { motion } from 'framer-motion'
+import Header from '../components/Header'
+import SubjectCard from '../components/SubjectCard'
+import { subjects } from '../data/subjects'
+
+export default function HomePage() {
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-4xl mx-auto px-6 py-12'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='text-center mb-16'
+        >
+          <h1 className='font-display text-5xl md:text-6xl font-bold text-learn-900 mb-6'>
+            LEARN
+          </h1>
+          <blockquote className='text-lg text-learn-500 italic max-w-lg mx-auto leading-relaxed'>
+            An investment in knowledge pays the best interest.
+          </blockquote>
+          <p className='text-sm text-learn-400 mt-2'>— Benjamin Franklin</p>
+        </motion.div>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {subjects.map((subject, index) => (
+            <SubjectCard key={subject.id} subject={subject} index={index} />
+          ))}
+        </div>
+      </main>
+    </div>
+  )
+}
+
+
+========== src/engine/storage.ts ==========
+
+import { FlashCard, SessionStats } from '../types'
+
+const STORAGE_KEY = 'learn_app_data'
+
+interface StoredData {
+  cards: FlashCard[]
+  stats: Record<string, SessionStats>
+  lastSession: string | null
+}
+
+export function getStoredData(): StoredData {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return { cards: [], stats: {}, lastSession: null }
+    return JSON.parse(raw, (key, value) => {
+      if (key === 'lastReviewed' || key === 'nextReview' || key === 'startTime') {
+        return value ? new Date(value) : null
+      }
+      return value
+    })
+  } catch {
+    return { cards: [], stats: {}, lastSession: null }
+  }
+}
+
+export function saveCard(card: FlashCard): void {
+  const data = getStoredData()
+  const existing = data.cards.findIndex(c => c.id === card.id)
+  if (existing >= 0) {
+    data.cards[existing] = card
+  } else {
+    data.cards.push(card)
+  }
+  saveData(data)
+}
+
+export function saveStats(subjectId: string, stats: SessionStats): void {
+  const data = getStoredData()
+  data.stats[subjectId] = stats
+  saveData(data)
+}
+
+function saveData(data: StoredData): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+
+
+========== src/engine/algorithm.ts ==========
+
+import { FlashCard, ReviewResult } from '../types'
+
+const MINUTES = 60 * 1000
+const HOURS = 60 * MINUTES
+const DAYS = 24 * HOURS
+
+export function calculateNextReview(
+  card: FlashCard,
+  result: ReviewResult
+): FlashCard {
+  const now = new Date()
+  let newMastery = card.mastery
+  let interval: number
+
+  switch (result) {
+    case 'wrong':
+      newMastery = Math.max(0, card.mastery - 1)
+      interval = 1 * MINUTES
+      break
+    case 'review':
+      newMastery = card.mastery
+      interval = 10 * MINUTES
+      break
+    case 'correct':
+      newMastery = Math.min(5, card.mastery + 1)
+      interval = getIntervalForMastery(newMastery)
+      break
+  }
+
+  return {
+    ...card,
+    mastery: newMastery,
+    lastReviewed: now,
+    nextReview: new Date(now.getTime() + interval)
+  }
+}
+
+function getIntervalForMastery(mastery: number): number {
+  switch (mastery) {
+    case 0: return 10 * MINUTES
+    case 1: return 1 * DAYS
+    case 2: return 3 * DAYS
+    case 3: return 7 * DAYS
+    case 4: return 14 * DAYS
+    case 5: return 30 * DAYS
+    default: return 1 * DAYS
+  }
+}
+
+export function selectCardsForSession(
+  cards: FlashCard[],
+  categoryId: string,
+  count: number = 10
+): FlashCard[] {
+  const now = new Date()
+  const categoryCards = cards.filter(c => 
+    c.category === categoryId && c.nextReview <= now
+  )
+  
+  categoryCards.sort((a, b) => {
+    if (a.mastery !== b.mastery) return a.mastery - b.mastery
+    if (!a.lastReviewed) return -1
+    if (!b.lastReviewed) return 1
+    return a.lastReviewed.getTime() - b.lastReviewed.getTime()
+  })
+
+  const pool = cards.filter(c => c.category === categoryId)
+  const selected = categoryCards.slice(0, count)
+  
+  if (selected.length < count) {
+    const usedIds = new Set(selected.map(c => c.id))
+    const remaining = pool.filter(c => !usedIds.has(c.id))
+    for (let i = remaining.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[remaining[i], remaining[j]] = [remaining[j], remaining[i]]
+    }
+    selected.push(...remaining.slice(0, count - selected.length))
+  }
+
+  return selected.slice(0, count)
+}

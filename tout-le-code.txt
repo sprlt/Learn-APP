@@ -1,0 +1,1056 @@
+
+
+========== src/App.tsx ==========
+
+import { Routes, Route } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import SubjectPage from './pages/SubjectPage'
+import CategoryPage from './pages/CategoryPage'
+import StudyPage from './pages/StudyPage'
+import ProgressPage from './pages/ProgressPage'
+
+function App() {
+  return (
+    <div className="min-h-screen bg-learn-50 font-body text-learn-800">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/subject/:subjectId" element={<SubjectPage />} />
+        <Route path="/subject/:subjectId/:categoryId" element={<CategoryPage />} />
+        <Route path="/study/:subjectId/:categoryId" element={<StudyPage />} />
+        <Route path="/progress" element={<ProgressPage />} />
+      </Routes>
+    </div>
+  )
+}
+
+export default App
+
+
+========== src/main.tsx ==========
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App'
+import './styles/index.css'
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>
+)
+
+
+========== src/types/index.ts ==========
+
+export interface FlashCard {
+  id: string
+  question: string
+  answer: string
+  subject: string
+  category: string
+  series?: number
+  difficulty: number
+  mastery: number
+  lastReviewed: Date | null
+  nextReview: Date
+  article?: string
+  singular?: string
+  plural?: string
+  greekWord?: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  description: string
+  cardCount: number
+  seriesCount?: number
+}
+
+export interface Subject {
+  id: string
+  name: string
+  description: string
+  icon: string
+  categories: Category[]
+  color: string
+}
+
+export type ReviewResult = 'wrong' | 'review' | 'correct'
+
+export interface SessionStats {
+  totalCards: number
+  correctCount: number
+  reviewCount: number
+  wrongCount: number
+  streak: number
+  startTime: Date
+}
+
+
+========== src/components/FlashCard.tsx ==========
+
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Volume2 } from 'lucide-react'
+import { FlashCard as FlashCardType } from '../types'
+import { useClickSound } from '../hooks/useClickSound'
+
+interface Props {
+  card: FlashCardType
+  onResult: (result: 'wrong' | 'review' | 'correct') => void
+}
+
+export default function FlashCardComponent({ card, onResult }: Props) {
+  const [flipped, setFlipped] = useState(false)
+  const playClick = useClickSound()
+
+  const handleFlip = () => {
+    playClick()
+    setFlipped(true)
+  }
+
+  const handleResult = (result: 'wrong' | 'review' | 'correct') => {
+    playClick()
+    onResult(result)
+    setFlipped(false)
+  }
+
+  const speakGreek = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if ('speechSynthesis' in window && card.question) {
+      const utterance = new SpeechSynthesisUtterance(card.question)
+      utterance.lang = 'el-GR'
+      utterance.rate = 0.8
+      window.speechSynthesis.speak(utterance)
+    }
+  }
+
+  return (
+    <div className='w-full max-w-md mx-auto'>
+      <div className='flex justify-center mb-6'>
+        <div className='flex gap-1.5'>
+          {[0, 1, 2, 3, 4].map(i => (
+            <div
+              key={i}
+              className={'w-2 h-2 rounded-full ' + (i < card.mastery ? 'bg-emerald-500' : 'bg-learn-300')}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className={'flip-card ' + (flipped ? 'flipped' : '')}>
+        <div className='flip-card-inner relative h-80'>
+          <div className='flip-card-front absolute inset-0 bg-white rounded-2xl card-shadow p-8 flex flex-col items-center justify-center cursor-pointer'
+               onClick={handleFlip}>
+            <span className='text-xs uppercase tracking-widest text-learn-400 mb-4'>
+              Question
+            </span>
+            <div className='text-center'>
+              {card.article && (
+                <span className='text-lg text-learn-500 mr-2'>{card.article}</span>
+              )}
+              <h2 className='text-4xl font-semibold text-learn-800'>
+                {card.question}
+              </h2>
+            </div>
+            <p className='text-sm text-learn-400 mt-8'>
+              Appuyez pour reveler
+            </p>
+          </div>
+
+          <div className='flip-card-back absolute inset-0 bg-white rounded-2xl card-shadow p-8 flex flex-col items-center justify-center'>
+            <span className='text-xs uppercase tracking-widest text-learn-400 mb-4'>
+              Reponse
+            </span>
+            <h2 className='text-3xl font-semibold text-learn-800 text-center'>
+              {card.answer}
+            </h2>
+            {card.greekWord && (
+              <div className='mt-6 text-center'>
+                <div className='flex items-center justify-center gap-2'>
+                  <p className='text-xl text-learn-600 font-medium'>
+                    {card.greekWord}
+                  </p>
+                  <button
+                    onClick={speakGreek}
+                    className='p-2 rounded-full hover:bg-learn-100 transition-colors'
+                    title='Ecouter la prononciation'
+                  >
+                    <Volume2 className='w-5 h-5 text-learn-500' />
+                  </button>
+                </div>
+                {card.singular && (
+                  <p className='text-base text-learn-500 mt-3 font-medium'>
+                    Sg. {card.singular}
+                  </p>
+                )}
+                {card.plural && (
+                  <p className='text-base text-learn-500 font-medium'>
+                    Pl. {card.plural}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {flipped && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='flex gap-3 mt-6'
+        >
+          <button
+            onClick={() => handleResult('wrong')}
+            className='flex-1 py-3.5 rounded-xl bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2'
+          >
+            <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
+              <path d='M5 5L15 15M15 5L5 15' stroke='currentColor' strokeWidth='2' strokeLinecap='round'/>
+            </svg>
+            <span className='hidden sm:inline'>Incorrect</span>
+          </button>
+          <button
+            onClick={() => handleResult('review')}
+            className='flex-1 py-3.5 rounded-xl bg-amber-50 text-amber-600 font-medium hover:bg-amber-100 transition-colors flex items-center justify-center gap-2'
+          >
+            <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
+              <path d='M10 4V10L13 13' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'/>
+              <circle cx='10' cy='10' r='7' stroke='currentColor' strokeWidth='2'/>
+            </svg>
+            <span className='hidden sm:inline'>A revoir</span>
+          </button>
+          <button
+            onClick={() => handleResult('correct')}
+            className='flex-1 py-3.5 rounded-xl bg-emerald-50 text-emerald-600 font-medium hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2'
+          >
+            <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
+              <path d='M4 10L8 14L16 6' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'/>
+            </svg>
+            <span className='hidden sm:inline'>Connu</span>
+          </button>
+        </motion.div>
+      )}
+
+      {!flipped && <div className='h-14 mt-6' />}
+    </div>
+  )
+}
+
+
+========== src/components/Logo.tsx ==========
+
+import { Link } from 'react-router-dom'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function Logo() {
+  const playClick = useClickSound()
+
+  return (
+    <Link
+      to='/'
+      className='font-display text-3xl font-bold tracking-wider text-learn-800 hover:text-learn-600 transition-colors'
+      onClick={playClick}
+    >
+      LEARN
+    </Link>
+  )
+}
+
+
+========== src/components/Header.tsx ==========
+
+import { Link } from 'react-router-dom'
+import { BarChart3 } from 'lucide-react'
+import Logo from './Logo'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function Header() {
+  const playClick = useClickSound()
+
+  return (
+    <header className='sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-learn-200'>
+      <div className='max-w-4xl mx-auto px-6 h-16 flex items-center justify-between'>
+        <Logo />
+        <nav className='flex items-center gap-4'>
+          <Link
+            to='/progress'
+            onClick={playClick}
+            className='p-2 rounded-xl hover:bg-learn-100 transition-colors'
+            aria-label='Progression'
+          >
+            <BarChart3 className='w-5 h-5 text-learn-600' />
+          </Link>
+        </nav>
+      </div>
+    </header>
+  )
+}
+
+
+========== src/components/SubjectCard.tsx ==========
+
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { BookOpen, Globe, Clock, Scale, Brain, TrendingUp } from 'lucide-react'
+import { Subject } from '../types'
+import { useClickSound } from '../hooks/useClickSound'
+
+const iconMap: Record<string, React.ElementType> = {
+  Greek: () => <span className='text-2xl'>Ω</span>,
+  Globe,
+  Clock,
+  Scale,
+  Brain,
+  TrendingUp,
+  BookOpen,
+}
+
+interface Props {
+  subject: Subject
+  index: number
+}
+
+export default function SubjectCard({ subject, index }: Props) {
+  const playClick = useClickSound()
+  const Icon = iconMap[subject.icon] || BookOpen
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.08, duration: 0.4 }}
+    >
+      <Link
+        to={'/subject/' + subject.id}
+        onClick={playClick}
+        className='group block p-6 bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all duration-300 border border-learn-200 hover:border-learn-300'
+      >
+        <div className='flex items-start gap-4'>
+          <div 
+            className='w-12 h-12 rounded-xl flex items-center justify-center text-white font-semibold'
+            style={{ backgroundColor: subject.color }}
+          >
+            <Icon />
+          </div>
+          <div className='flex-1 min-w-0'>
+            <h3 className='font-semibold text-lg text-learn-800 group-hover:text-learn-700'>
+              {subject.name}
+            </h3>
+            <p className='text-sm text-learn-500 mt-1 leading-relaxed'>
+              {subject.description}
+            </p>
+            {subject.categories.length > 0 && (
+              <p className='text-xs text-learn-400 mt-3'>
+                {subject.categories.length} categorie{subject.categories.length > 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  )
+}
+
+
+========== src/hooks/useClickSound.ts ==========
+
+import { useCallback, useRef } from 'react'
+
+export function useClickSound() {
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const playClick = useCallback(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/sounds/click.wav')
+      audioRef.current.volume = 0.3
+    }
+    audioRef.current.currentTime = 0
+    audioRef.current.play().catch(() => {})
+  }, [])
+
+  return playClick
+}
+
+
+========== src/data/subjects.ts ==========
+
+import { Subject } from '../types'
+
+export const subjects: Subject[] = [
+  {
+    id: 'greek',
+    name: 'Grec moderne',
+    description: 'Apprenez le grec moderne avec du vocabulaire essentiel',
+    icon: 'Greek',
+    color: '#2563eb',
+    categories: [
+      {
+        id: 'greek-verbs',
+        name: 'Verbes (present)',
+        description: 'Les verbes les plus courants au present de l indicatif',
+        cardCount: 150,
+        seriesCount: 10
+      },
+      {
+        id: 'greek-adjectives',
+        name: 'Adjectifs',
+        description: 'Adjectifs courants pour decrire et qualifier',
+        cardCount: 150,
+        seriesCount: 10
+      },
+      {
+        id: 'greek-nouns',
+        name: 'Noms communs',
+        description: 'Vocabulaire de base : objets, lieux, personnes',
+        cardCount: 150,
+        seriesCount: 10
+      }
+    ]
+  },
+  {
+    id: 'geography',
+    name: 'Geographie',
+    description: 'Pays, capitales, drapeaux et cartes du monde',
+    icon: 'Globe',
+    color: '#059669',
+    categories: [
+      {
+        id: 'geo-flags',
+        name: 'Drapeaux',
+        description: 'Identifiez les drapeaux des pays du monde',
+        cardCount: 50
+      },
+      {
+        id: 'geo-capitals',
+        name: 'Capitales',
+        description: 'Trouvez la capitale de chaque pays',
+        cardCount: 50
+      },
+      {
+        id: 'geo-map',
+        name: 'Carte interactive',
+        description: 'Localisez les pays sur la carte du monde',
+        cardCount: 50
+      }
+    ]
+  },
+  {
+    id: 'history',
+    name: 'Histoire',
+    description: 'Les grandes periodes et evenements historiques',
+    icon: 'Clock',
+    color: '#dc2626',
+    categories: []
+  },
+  {
+    id: 'politics',
+    name: 'Politique',
+    description: 'Theorie politique et geopolitique',
+    icon: 'Scale',
+    color: '#7c3aed',
+    categories: []
+  },
+  {
+    id: 'psychology',
+    name: 'Psychologie',
+    description: 'Biais cognitifs, psychologie sociale et fonctionnement humain',
+    icon: 'Brain',
+    color: '#db2777',
+    categories: []
+  },
+  {
+    id: 'finance',
+    name: 'Argent & Finance',
+    description: 'Investissement, patrimoine et entrepreneuriat',
+    icon: 'TrendingUp',
+    color: '#d97706',
+    categories: []
+  },
+  {
+    id: 'general',
+    name: 'Culture generale',
+    description: 'Sciences, philosophie et grandes decouvertes',
+    icon: 'BookOpen',
+    color: '#0891b2',
+    categories: []
+  }
+]
+
+
+========== src/data/greek/verbs/index.ts ==========
+
+import { FlashCard } from '../../types'
+
+export const greekVerbsS1: FlashCard[] = [
+  { id: 'greek-v-1-1', question: 'είμαι', article: '', answer: 'être', greekWord: 'είμαι', singular: 'είμαι', plural: 'είμαστε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 1, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-2', question: 'έχω', article: '', answer: 'avoir', greekWord: 'έχω', singular: 'έχω', plural: 'έχουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 1, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-3', question: 'κάνω', article: '', answer: 'faire', greekWord: 'κάνω', singular: 'κάνω', plural: 'κάνουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-4', question: 'πάω', article: '', answer: 'aller', greekWord: 'πάω', singular: 'πάω', plural: 'πάμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-5', question: 'λέω', article: '', answer: 'dire', greekWord: 'λέω', singular: 'λέω', plural: 'λέμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-6', question: 'βλέπω', article: '', answer: 'voir', greekWord: 'βλέπω', singular: 'βλέπω', plural: 'βλέπουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-7', question: 'ξέρω', article: '', answer: 'savoir', greekWord: 'ξέρω', singular: 'ξέρω', plural: 'ξέρουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-8', question: 'έρχομαι', article: '', answer: 'venir', greekWord: 'έρχομαι', singular: 'έρχομαι', plural: 'ερχόμαστε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-9', question: 'θέλω', article: '', answer: 'vouloir', greekWord: 'θέλω', singular: 'θέλω', plural: 'θέλουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 1, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-10', question: 'μπορώ', article: '', answer: 'pouvoir', greekWord: 'μπορώ', singular: 'μπορώ', plural: 'μπορούμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-11', question: 'τρώω', article: '', answer: 'manger', greekWord: 'τρώω', singular: 'τρώω', plural: 'τρώμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-12', question: 'πίνω', article: '', answer: 'boire', greekWord: 'πίνω', singular: 'πίνω', plural: 'πίνουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-13', question: 'δίνω', article: '', answer: 'donner', greekWord: 'δίνω', singular: 'δίνω', plural: 'δίνουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-14', question: 'παίρνω', article: '', answer: 'prendre', greekWord: 'παίρνω', singular: 'παίρνω', plural: 'παίρνουμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 3, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-1-15', question: 'μιλάω', article: '', answer: 'parler', greekWord: 'μιλάω', singular: 'μιλάω', plural: 'μιλάμε', subject: 'greek', category: 'greek-verbs', series: 1, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() }
+]
+
+export const greekVerbsS2: FlashCard[] = [
+  { id: 'greek-v-2-1', question: 'τρέχω', article: '', answer: 'courir', greekWord: 'τρέχω', singular: 'τρέχω', plural: 'τρέχουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-2', question: 'περπατάω', article: '', answer: 'marcher', greekWord: 'περπατάω', singular: 'περπατάω', plural: 'περπατάμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-3', question: 'φεύγω', article: '', answer: 'partir', greekWord: 'φεύγω', singular: 'φεύγω', plural: 'φεύγουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-4', question: 'ανεβαίνω', article: '', answer: 'monter', greekWord: 'ανεβαίνω', singular: 'ανεβαίνω', plural: 'ανεβαίνουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-5', question: 'κατεβαίνω', article: '', answer: 'descendre', greekWord: 'κατεβαίνω', singular: 'κατεβαίνω', plural: 'κατεβαίνουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-6', question: 'γυρίζω', article: '', answer: 'retourner', greekWord: 'γυρίζω', singular: 'γυρίζω', plural: 'γυρίζουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-7', question: 'σταματάω', article: '', answer: 's\'arrêter', greekWord: 'σταματάω', singular: 'σταματάω', plural: 'σταματάμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-8', question: 'ξεκινάω', article: '', answer: 'commencer', greekWord: 'ξεκινάω', singular: 'ξεκινάω', plural: 'ξεκινάμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-9', question: 'συνεχίζω', article: '', answer: 'continuer', greekWord: 'συνεχίζω', singular: 'συνεχίζω', plural: 'συνεχίζουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-10', question: 'ολοκληρώνω', article: '', answer: 'terminer', greekWord: 'ολοκληρώνω', singular: 'ολοκληρώνω', plural: 'ολοκληρώνουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-11', question: 'προχωράω', article: '', answer: 'avancer', greekWord: 'προχωράω', singular: 'προχωράω', plural: 'προχωράμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-12', question: 'γυρνάω', article: '', answer: 'tourner', greekWord: 'γυρνάω', singular: 'γυρνάω', plural: 'γυρνάμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-13', question: 'κινούμαι', article: '', answer: 'se déplacer', greekWord: 'κινούμαι', singular: 'κινούμαι', plural: 'κινούμαστε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-14', question: 'πηγαίνω', article: '', answer: 'aller (formel)', greekWord: 'πηγαίνω', singular: 'πηγαίνω', plural: 'πηγαίνουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() },
+  { id: 'greek-v-2-15', question: 'επιστρέφω', article: '', answer: 'revenir', greekWord: 'επιστρέφω', singular: 'επιστρέφω', plural: 'επιστρέφουμε', subject: 'greek', category: 'greek-verbs', series: 2, difficulty: 2, mastery: 0, lastReviewed: null, nextReview: new Date() }
+]
+
+
+========== src/data/allCards.ts ==========
+
+import { greekVerbs, greekAdjectives, greekNouns } from './greek'
+
+export const allCards = [...greekVerbs, ...greekAdjectives, ...greekNouns]
+
+
+========== src/pages/SubjectPage.tsx ==========
+
+import { useParams, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowLeft, Lock } from 'lucide-react'
+import Header from '../components/Header'
+import { subjects } from '../data/subjects'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function SubjectPage() {
+  const { subjectId } = useParams<{ subjectId: string }>()
+  const playClick = useClickSound()
+  const subject = subjects.find(s => s.id === subjectId)
+  if (!subject) return <div>Matiere non trouvee</div>
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-4xl mx-auto px-6 py-8'>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='mb-8'>
+          <Link to='/' onClick={playClick} className='inline-flex items-center gap-2 text-learn-500 hover:text-learn-700 transition-colors mb-4'>
+            <ArrowLeft className='w-4 h-4' />
+            <span className='text-sm'>Retour</span>
+          </Link>
+          <h1 className='font-display text-3xl font-bold text-learn-900'>{subject.name}</h1>
+          <p className='text-learn-500 mt-2'>{subject.description}</p>
+        </motion.div>
+
+        {subject.categories.length > 0 ? (
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {subject.categories.map((category, index) => (
+              <motion.div key={category.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+                <Link to={'/study/' + subject.id + '/' + category.id} onClick={playClick}
+                  className='block p-6 bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all border border-learn-200 hover:border-learn-300'>
+                  <div className='flex items-center justify-between'>
+                    <div>
+                      <h3 className='font-semibold text-lg text-learn-800'>{category.name}</h3>
+                      <p className='text-sm text-learn-500 mt-1'>{category.description}</p>
+                      <p className='text-xs text-learn-400 mt-3'>{category.cardCount} cartes</p>
+                    </div>
+                    <div className='w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-semibold' style={{ backgroundColor: subject.color }}>
+                      {category.cardCount}
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className='text-center py-16'>
+            <Lock className='w-12 h-12 text-learn-300 mx-auto mb-4' />
+            <p className='text-learn-500'>Cette matiere sera bientot disponible</p>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/StudyPage.tsx ==========
+
+import { useState, useCallback, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import Header from '../components/Header'
+import FlashCardComponent from '../components/FlashCard'
+import { allCards } from '../data/allCards'
+import { selectCardsForSession, calculateNextReview } from '../engine/algorithm'
+import { saveCard } from '../engine/storage'
+import { FlashCard, ReviewResult } from '../types'
+
+export default function StudyPage() {
+  const { subjectId, categoryId } = useParams<{ subjectId: string; categoryId: string }>()
+  const navigate = useNavigate()
+  const [cards, setCards] = useState<FlashCard[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [sessionComplete, setSessionComplete] = useState(false)
+  const [stats, setStats] = useState({ correct: 0, review: 0, wrong: 0 })
+
+  useEffect(() => {
+    const categoryCards = allCards.filter(c => c.category === categoryId)
+    const sessionCards = selectCardsForSession(categoryCards, categoryId!, 10)
+    setCards(sessionCards)
+  }, [categoryId])
+
+  const handleResult = useCallback((result: ReviewResult) => {
+    const currentCard = cards[currentIndex]
+    if (!currentCard) return
+    const updatedCard = calculateNextReview(currentCard, result)
+    saveCard(updatedCard)
+    setStats(prev => ({
+      correct: prev.correct + (result === 'correct' ? 1 : 0),
+      review: prev.review + (result === 'review' ? 1 : 0),
+      wrong: prev.wrong + (result === 'wrong' ? 1 : 0)
+    }))
+    if (currentIndex >= cards.length - 1) {
+      setSessionComplete(true)
+    } else {
+      setCurrentIndex(prev => prev + 1)
+    }
+  }, [cards, currentIndex])
+
+  const handleRestart = () => {
+    const categoryCards = allCards.filter(c => c.category === categoryId)
+    const sessionCards = selectCardsForSession(categoryCards, categoryId!, 10)
+    setCards(sessionCards)
+    setCurrentIndex(0)
+    setSessionComplete(false)
+    setStats({ correct: 0, review: 0, wrong: 0 })
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <p className='text-learn-500'>Chargement...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-2xl mx-auto px-6 py-8'>
+        {!sessionComplete ? (
+          <>
+            <div className='flex items-center justify-between mb-8'>
+              <span className='text-sm text-learn-500'>
+                Carte {currentIndex + 1} / {cards.length}
+              </span>
+              <div className='flex-1 mx-4 h-2 bg-learn-200 rounded-full overflow-hidden'>
+                <motion.div 
+                  className='h-full bg-learn-600 rounded-full'
+                  initial={{ width: 0 }}
+                  animate={{ width: ((currentIndex) / cards.length) * 100 + '%' }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            </div>
+
+            <AnimatePresence mode='wait'>
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.25 }}
+              >
+                <FlashCardComponent 
+                  card={cards[currentIndex]} 
+                  onResult={handleResult}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className='text-center py-16'
+          >
+            <div className='w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6'>
+              <svg width='32' height='32' viewBox='0 0 20 20' fill='none'>
+                <path d='M4 10L8 14L16 6' stroke='#059669' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'/>
+              </svg>
+            </div>
+            
+            <h2 className='font-display text-2xl font-bold text-learn-900 mb-2'>
+              Session terminee !
+            </h2>
+            <p className='text-learn-500 mb-8'>Voici vos resultats</p>
+
+            <div className='grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8'>
+              <div className='p-4 bg-emerald-50 rounded-2xl'>
+                <p className='text-2xl font-bold text-emerald-600'>{stats.correct}</p>
+                <p className='text-xs text-emerald-500 mt-1'>Connus</p>
+              </div>
+              <div className='p-4 bg-amber-50 rounded-2xl'>
+                <p className='text-2xl font-bold text-amber-600'>{stats.review}</p>
+                <p className='text-xs text-amber-500 mt-1'>A revoir</p>
+              </div>
+              <div className='p-4 bg-red-50 rounded-2xl'>
+                <p className='text-2xl font-bold text-red-600'>{stats.wrong}</p>
+                <p className='text-xs text-red-500 mt-1'>Difficiles</p>
+              </div>
+            </div>
+
+            <div className='flex gap-3 justify-center'>
+              <button
+                onClick={() => navigate('/subject/' + subjectId)}
+                className='px-6 py-3 rounded-xl bg-learn-100 text-learn-700 font-medium hover:bg-learn-200 transition-colors'
+              >
+                Retour
+              </button>
+              <button
+                onClick={handleRestart}
+                className='px-6 py-3 rounded-xl bg-learn-800 text-white font-medium hover:bg-learn-700 transition-colors'
+              >
+                Nouvelle session
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/ProgressPage.tsx ==========
+
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowLeft, TrendingUp } from 'lucide-react'
+import Header from '../components/Header'
+import { getStoredData } from '../engine/storage'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function ProgressPage() {
+  const playClick = useClickSound()
+  const data = getStoredData()
+
+  const totalCards = data.cards.length
+  const masteredCards = data.cards.filter(c => c.mastery >= 4).length
+  const averageMastery = totalCards > 0 
+    ? (data.cards.reduce((sum, c) => sum + c.mastery, 0) / totalCards).toFixed(1)
+    : '0'
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-4xl mx-auto px-6 py-8'>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <Link to='/' onClick={playClick} className='inline-flex items-center gap-2 text-learn-500 hover:text-learn-700 transition-colors mb-4'>
+            <ArrowLeft className='w-4 h-4' />
+            <span className='text-sm'>Retour</span>
+          </Link>
+
+          <h1 className='font-display text-3xl font-bold text-learn-900 mb-8'>
+            Progression
+          </h1>
+
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
+            <div className='p-6 bg-white rounded-2xl card-shadow'>
+              <TrendingUp className='w-6 h-6 text-learn-400 mb-3' />
+              <p className='text-3xl font-bold text-learn-800'>{totalCards}</p>
+              <p className='text-sm text-learn-500 mt-1'>Cartes etudiees</p>
+            </div>
+            <div className='p-6 bg-white rounded-2xl card-shadow'>
+              <div className='w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center mb-3'>
+                <div className='w-3 h-3 rounded-full bg-emerald-500' />
+              </div>
+              <p className='text-3xl font-bold text-learn-800'>{masteredCards}</p>
+              <p className='text-sm text-learn-500 mt-1'>Cartes maitrisees</p>
+            </div>
+            <div className='p-6 bg-white rounded-2xl card-shadow'>
+              <div className='w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mb-3'>
+                <span className='text-xs font-bold text-blue-600'>{averageMastery}</span>
+              </div>
+              <p className='text-3xl font-bold text-learn-800'>{averageMastery}<span className='text-lg text-learn-400'>/5</span></p>
+              <p className='text-sm text-learn-500 mt-1'>Maitrise moyenne</p>
+            </div>
+          </div>
+
+          {totalCards > 0 && (
+            <div className='bg-white rounded-2xl card-shadow p-6'>
+              <h3 className='font-semibold text-learn-800 mb-4'>Niveau de maitrise</h3>
+              <div className='space-y-3'>
+                {[0, 1, 2, 3, 4, 5].map(level => {
+                  const count = data.cards.filter(c => c.mastery === level).length
+                  const percentage = totalCards > 0 ? (count / totalCards) * 100 : 0
+                  const labels = ['A apprendre', 'Debutant', 'En progres', 'Intermediaire', 'Avance', 'Maitrise']
+                  return (
+                    <div key={level} className='flex items-center gap-4'>
+                      <span className='text-sm text-learn-500 w-28'>{labels[level]}</span>
+                      <div className='flex-1 h-3 bg-learn-100 rounded-full overflow-hidden'>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: percentage + '%' }}
+                          transition={{ duration: 0.5, delay: level * 0.1 }}
+                          className={'h-full rounded-full ' + (
+                            level === 5 ? 'bg-emerald-500' :
+                            level >= 3 ? 'bg-blue-500' :
+                            level >= 1 ? 'bg-amber-500' : 'bg-learn-300'
+                          )}
+                        />
+                      </div>
+                      <span className='text-sm text-learn-500 w-8 text-right'>{count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {totalCards === 0 && (
+            <div className='text-center py-16'>
+              <p className='text-learn-500'>Commencez une session pour voir vos progres</p>
+            </div>
+          )}
+        </motion.div>
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/CategoryPage.tsx ==========
+
+import { useParams, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowLeft, Play } from 'lucide-react'
+import Header from '../components/Header'
+import { subjects } from '../data/subjects'
+import { useClickSound } from '../hooks/useClickSound'
+
+export default function CategoryPage() {
+  const { subjectId, categoryId } = useParams<{ subjectId: string; categoryId: string }>()
+  const playClick = useClickSound()
+  const subject = subjects.find(s => s.id === subjectId)
+  const category = subject?.categories.find(c => c.id === categoryId)
+  if (!subject || !category) return <div>Categorie non trouvee</div>
+
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-2xl mx-auto px-6 py-8'>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='mb-8'>
+          <Link to={'/subject/' + subjectId} onClick={playClick} className='inline-flex items-center gap-2 text-learn-500 hover:text-learn-700 transition-colors mb-4'>
+            <ArrowLeft className='w-4 h-4' />
+            <span className='text-sm'>{subject.name}</span>
+          </Link>
+          <h1 className='font-display text-3xl font-bold text-learn-900'>
+            {category.name}
+          </h1>
+          <p className='text-learn-500 mt-2'>{category.description}</p>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <Link to={'/study/' + subjectId + '/' + categoryId} onClick={playClick}
+            className='flex items-center justify-center gap-3 w-full py-4 rounded-2xl text-white font-semibold text-lg transition-transform hover:scale-[1.02] active:scale-[0.98]'
+            style={{ backgroundColor: subject.color }}>
+            <Play className='w-5 h-5' />
+            Commencer la session
+          </Link>
+          <p className='text-center text-sm text-learn-400 mt-4'>
+            10 cartes selectionnees parmi {category.cardCount}
+          </p>
+        </motion.div>
+      </main>
+    </div>
+  )
+}
+
+
+========== src/pages/HomePage.tsx ==========
+
+import { motion } from 'framer-motion'
+import Header from '../components/Header'
+import SubjectCard from '../components/SubjectCard'
+import { subjects } from '../data/subjects'
+
+export default function HomePage() {
+  return (
+    <div className='min-h-screen'>
+      <Header />
+      <main className='max-w-4xl mx-auto px-6 py-12'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='text-center mb-16'
+        >
+          <h1 className='font-display text-5xl md:text-6xl font-bold text-learn-900 mb-6'>
+            LEARN
+          </h1>
+          <blockquote className='text-lg text-learn-500 italic max-w-lg mx-auto leading-relaxed'>
+            An investment in knowledge pays the best interest.
+          </blockquote>
+          <p className='text-sm text-learn-400 mt-2'>— Benjamin Franklin</p>
+        </motion.div>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {subjects.map((subject, index) => (
+            <SubjectCard key={subject.id} subject={subject} index={index} />
+          ))}
+        </div>
+      </main>
+    </div>
+  )
+}
+
+
+========== src/engine/storage.ts ==========
+
+import { FlashCard, SessionStats } from '../types'
+
+const STORAGE_KEY = 'learn_app_data'
+
+interface StoredData {
+  cards: FlashCard[]
+  stats: Record<string, SessionStats>
+  lastSession: string | null
+}
+
+export function getStoredData(): StoredData {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return { cards: [], stats: {}, lastSession: null }
+    return JSON.parse(raw, (key, value) => {
+      if (key === 'lastReviewed' || key === 'nextReview' || key === 'startTime') {
+        return value ? new Date(value) : null
+      }
+      return value
+    })
+  } catch {
+    return { cards: [], stats: {}, lastSession: null }
+  }
+}
+
+export function saveCard(card: FlashCard): void {
+  const data = getStoredData()
+  const existing = data.cards.findIndex(c => c.id === card.id)
+  if (existing >= 0) {
+    data.cards[existing] = card
+  } else {
+    data.cards.push(card)
+  }
+  saveData(data)
+}
+
+export function saveStats(subjectId: string, stats: SessionStats): void {
+  const data = getStoredData()
+  data.stats[subjectId] = stats
+  saveData(data)
+}
+
+function saveData(data: StoredData): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+
+
+========== src/engine/algorithm.ts ==========
+
+import { FlashCard, ReviewResult } from '../types'
+
+const MINUTES = 60 * 1000
+const HOURS = 60 * MINUTES
+const DAYS = 24 * HOURS
+
+export function calculateNextReview(
+  card: FlashCard,
+  result: ReviewResult
+): FlashCard {
+  const now = new Date()
+  let newMastery = card.mastery
+  let interval: number
+
+  switch (result) {
+    case 'wrong':
+      newMastery = Math.max(0, card.mastery - 1)
+      interval = 1 * MINUTES
+      break
+    case 'review':
+      newMastery = card.mastery
+      interval = 10 * MINUTES
+      break
+    case 'correct':
+      newMastery = Math.min(5, card.mastery + 1)
+      interval = getIntervalForMastery(newMastery)
+      break
+  }
+
+  return {
+    ...card,
+    mastery: newMastery,
+    lastReviewed: now,
+    nextReview: new Date(now.getTime() + interval)
+  }
+}
+
+function getIntervalForMastery(mastery: number): number {
+  switch (mastery) {
+    case 0: return 10 * MINUTES
+    case 1: return 1 * DAYS
+    case 2: return 3 * DAYS
+    case 3: return 7 * DAYS
+    case 4: return 14 * DAYS
+    case 5: return 30 * DAYS
+    default: return 1 * DAYS
+  }
+}
+
+export function selectCardsForSession(
+  cards: FlashCard[],
+  categoryId: string,
+  count: number = 10
+): FlashCard[] {
+  const now = new Date()
+  const categoryCards = cards.filter(c => 
+    c.category === categoryId && c.nextReview <= now
+  )
+  
+  categoryCards.sort((a, b) => {
+    if (a.mastery !== b.mastery) return a.mastery - b.mastery
+    if (!a.lastReviewed) return -1
+    if (!b.lastReviewed) return 1
+    return a.lastReviewed.getTime() - b.lastReviewed.getTime()
+  })
+
+  const pool = cards.filter(c => c.category === categoryId)
+  const selected = categoryCards.slice(0, count)
+  
+  if (selected.length < count) {
+    const usedIds = new Set(selected.map(c => c.id))
+    const remaining = pool.filter(c => !usedIds.has(c.id))
+    for (let i = remaining.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[remaining[i], remaining[j]] = [remaining[j], remaining[i]]
+    }
+    selected.push(...remaining.slice(0, count - selected.length))
+  }
+
+  return selected.slice(0, count)
+}

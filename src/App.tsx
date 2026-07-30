@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import SubjectPage from './pages/SubjectPage'
-import CategoryPage from './pages/CategoryPage'
+import SeriesPage from './pages/SeriesPage'
 import StudyPage from './pages/StudyPage'
 import ProgressPage from './pages/ProgressPage'
 
@@ -11,8 +11,8 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/subject/:subjectId" element={<SubjectPage />} />
-        <Route path="/subject/:subjectId/:categoryId" element={<CategoryPage />} />
-        <Route path="/study/:subjectId/:categoryId" element={<StudyPage />} />
+        <Route path="/subject/:subjectId/:categoryId" element={<SeriesPage />} />
+        <Route path="/study/:subjectId/:categoryId/:seriesId" element={<StudyPage />} />
         <Route path="/progress" element={<ProgressPage />} />
       </Routes>
     </div>

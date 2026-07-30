@@ -24,10 +24,9 @@ export default function FlashCardComponent({ card, onResult }: Props) {
     setFlipped(false)
   }
 
-  const speakGreek = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if ('speechSynthesis' in window && card.question) {
-      const utterance = new SpeechSynthesisUtterance(card.question)
+  const speakGreek = (text: string) => {
+    if ('speechSynthesis' in window && text) {
+      const utterance = new SpeechSynthesisUtterance(text)
       utterance.lang = 'el-GR'
       utterance.rate = 0.8
       window.speechSynthesis.speak(utterance)
@@ -49,6 +48,7 @@ export default function FlashCardComponent({ card, onResult }: Props) {
 
       <div className={'flip-card ' + (flipped ? 'flipped' : '')}>
         <div className='flip-card-inner relative h-80'>
+          {/* RECTO - Question */}
           <div className='flip-card-front absolute inset-0 bg-white rounded-2xl card-shadow p-8 flex flex-col items-center justify-center cursor-pointer'
                onClick={handleFlip}>
             <span className='text-xs uppercase tracking-widest text-learn-400 mb-4'>
@@ -58,48 +58,93 @@ export default function FlashCardComponent({ card, onResult }: Props) {
               {card.article && (
                 <span className='text-lg text-learn-500 mr-2'>{card.article}</span>
               )}
-              <h2 className='text-4xl font-semibold text-learn-800'>
-                {card.question}
-              </h2>
+              <div className='flex items-center justify-center gap-2'>
+                <h2 className='text-4xl font-semibold text-learn-800'>
+                  {card.question}
+                </h2>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    speakGreek(card.question)
+                  }}
+                  className='p-2 rounded-full hover:bg-learn-100 transition-colors'
+                  title='Ecouter la prononciation'
+                >
+                  <Volume2 className='w-5 h-5 text-learn-400 hover:text-learn-600' />
+                </button>
+              </div>
             </div>
             <p className='text-sm text-learn-400 mt-8'>
               Appuyez pour reveler
             </p>
           </div>
 
+          {/* VERSO - Reponse */}
           <div className='flip-card-back absolute inset-0 bg-white rounded-2xl card-shadow p-8 flex flex-col items-center justify-center'>
             <span className='text-xs uppercase tracking-widest text-learn-400 mb-4'>
               Reponse
             </span>
-            <h2 className='text-3xl font-semibold text-learn-800 text-center'>
+            <h2 className='text-3xl font-semibold text-learn-800 text-center mb-4'>
               {card.answer}
             </h2>
-            {card.greekWord && (
-              <div className='mt-6 text-center'>
+            
+            {/* Mot grec avec bouton volume */}
+            <div className='mt-2 text-center space-y-2'>
+              <div className='flex items-center justify-center gap-2'>
+                {card.article && (
+                  <span className='text-lg text-learn-500'>{card.article}</span>
+                )}
+                <p className='text-xl text-learn-600 font-medium'>
+                  {card.greekWord || card.question}
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    speakGreek(card.greekWord || card.question)
+                  }}
+                  className='p-1.5 rounded-full hover:bg-learn-100 transition-colors'
+                  title='Ecouter la prononciation'
+                >
+                  <Volume2 className='w-4 h-4 text-learn-400 hover:text-learn-600' />
+                </button>
+              </div>
+              
+              {card.singular && (
                 <div className='flex items-center justify-center gap-2'>
-                  <p className='text-xl text-learn-600 font-medium'>
-                    {card.greekWord}
-                  </p>
-                  <button
-                    onClick={speakGreek}
-                    className='p-2 rounded-full hover:bg-learn-100 transition-colors'
-                    title='Ecouter la prononciation'
-                  >
-                    <Volume2 className='w-5 h-5 text-learn-500' />
-                  </button>
-                </div>
-                {card.singular && (
-                  <p className='text-base text-learn-500 mt-3 font-medium'>
+                  <p className='text-base text-learn-500 font-medium'>
                     Sg. {card.singular}
                   </p>
-                )}
-                {card.plural && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      speakGreek(card.singular || " ")
+                    }}
+                    className='p-1 rounded-full hover:bg-learn-100 transition-colors'
+                    title='Ecouter le singulier'
+                  >
+                    <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                  </button>
+                </div>
+              )}
+              
+              {card.plural && (
+                <div className='flex items-center justify-center gap-2'>
                   <p className='text-base text-learn-500 font-medium'>
                     Pl. {card.plural}
                   </p>
-                )}
-              </div>
-            )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      speakGreek(card.plural || " ")
+                    }}
+                    className='p-1 rounded-full hover:bg-learn-100 transition-colors'
+                    title='Ecouter le pluriel'
+                  >
+                    <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

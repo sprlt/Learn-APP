@@ -28,16 +28,16 @@ export default function SubjectPage() {
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             {subject.categories.map((category, index) => (
               <motion.div key={category.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
-                <Link to={'/study/' + subject.id + '/' + category.id} onClick={playClick}
+                <Link to={'/subject/' + subject.id + '/' + category.id} onClick={playClick}
                   className='block p-6 bg-white rounded-2xl card-shadow hover:card-shadow-hover transition-all border border-learn-200 hover:border-learn-300'>
                   <div className='flex items-center justify-between'>
                     <div>
                       <h3 className='font-semibold text-lg text-learn-800'>{category.name}</h3>
                       <p className='text-sm text-learn-500 mt-1'>{category.description}</p>
-                      <p className='text-xs text-learn-400 mt-3'>{category.cardCount} cartes</p>
+                      <p className='text-xs text-learn-400 mt-3'>{category.cardCount} cartes · {category.seriesCount || 1} serie{category.seriesCount && category.seriesCount > 1 ? 's' : ''}</p>
                     </div>
                     <div className='w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-semibold' style={{ backgroundColor: subject.color }}>
-                      {category.cardCount}
+                      {category.seriesCount || 1}
                     </div>
                   </div>
                 </Link>
