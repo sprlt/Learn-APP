@@ -33,6 +33,11 @@ export default function FlashCardComponent({ card, onResult }: Props) {
     }
   }
 
+  // Déterminer quel type de carte
+  const isNouns = card.category === 'greek-nouns'
+  const isAdjectives = card.category === 'greek-adjectives'
+  const isVerbs = card.category === 'greek-verbs'
+
   return (
     <div className='w-full max-w-md mx-auto'>
       <div className='flex justify-center mb-6'>
@@ -88,63 +93,100 @@ export default function FlashCardComponent({ card, onResult }: Props) {
               {card.answer}
             </h2>
             
-            {/* Mot grec avec bouton volume */}
-            <div className='mt-2 text-center space-y-2'>
-              <div className='flex items-center justify-center gap-2'>
-                {card.article && (
-                  <span className='text-lg text-learn-500'>{card.article}</span>
+            {/* ADJECTIFS - Masculin / Féminin / Neutre */}
+            {isAdjectives && (
+              <div className='mt-2 text-center space-y-2'>
+                {card.masculine && (
+                  <div className='flex items-center justify-center gap-2'>
+                    <span className='text-sm text-learn-400'>M.</span>
+                    <p className='text-lg text-learn-600 font-medium'>{card.masculine}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakGreek(card.masculine || '') }}
+                      className='p-1 rounded-full hover:bg-learn-100 transition-colors'
+                    >
+                      <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                    </button>
+                  </div>
                 )}
-                <p className='text-xl text-learn-600 font-medium'>
-                  {card.greekWord || card.question}
-                </p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    speakGreek(card.greekWord || card.question)
-                  }}
-                  className='p-1.5 rounded-full hover:bg-learn-100 transition-colors'
-                  title='Ecouter la prononciation'
-                >
-                  <Volume2 className='w-4 h-4 text-learn-400 hover:text-learn-600' />
-                </button>
+                {card.feminine && (
+                  <div className='flex items-center justify-center gap-2'>
+                    <span className='text-sm text-learn-400'>F.</span>
+                    <p className='text-lg text-learn-600 font-medium'>{card.feminine}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakGreek(card.feminine || '') }}
+                      className='p-1 rounded-full hover:bg-learn-100 transition-colors'
+                    >
+                      <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                    </button>
+                  </div>
+                )}
+                {card.neuter && (
+                  <div className='flex items-center justify-center gap-2'>
+                    <span className='text-sm text-learn-400'>N.</span>
+                    <p className='text-lg text-learn-600 font-medium'>{card.neuter}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakGreek(card.neuter || '') }}
+                      className='p-1 rounded-full hover:bg-learn-100 transition-colors'
+                    >
+                      <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                    </button>
+                  </div>
+                )}
               </div>
-              
-              {card.singular && (
+            )}
+
+            {/* NOMS COMMUNS - Singulier / Pluriel */}
+            {isNouns && (
+              <div className='mt-2 text-center space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
-                  <p className='text-base text-learn-500 font-medium'>
-                    Sg. {card.singular}
-                  </p>
+                  {card.article && <span className='text-lg text-learn-500'>{card.article}</span>}
+                  <p className='text-xl text-learn-600 font-medium'>{card.greekWord || card.question}</p>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      speakGreek(card.singular || " ")
-                    }}
-                    className='p-1 rounded-full hover:bg-learn-100 transition-colors'
-                    title='Ecouter le singulier'
+                    onClick={(e) => { e.stopPropagation(); speakGreek(card.greekWord || card.question) }}
+                    className='p-1.5 rounded-full hover:bg-learn-100 transition-colors'
                   >
-                    <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                    <Volume2 className='w-4 h-4 text-learn-400 hover:text-learn-600' />
                   </button>
                 </div>
-              )}
-              
-              {card.plural && (
+                {card.singular && (
+                  <div className='flex items-center justify-center gap-2'>
+                    <p className='text-base text-learn-500 font-medium'>Sg. {card.singular}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakGreek(card.singular || '') }}
+                      className='p-1 rounded-full hover:bg-learn-100 transition-colors'
+                    >
+                      <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                    </button>
+                  </div>
+                )}
+                {card.plural && (
+                  <div className='flex items-center justify-center gap-2'>
+                    <p className='text-base text-learn-500 font-medium'>Pl. {card.plural}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakGreek(card.plural || '') }}
+                      className='p-1 rounded-full hover:bg-learn-100 transition-colors'
+                    >
+                      <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* VERBES - Juste le mot grec */}
+            {isVerbs && (
+              <div className='mt-2 text-center'>
                 <div className='flex items-center justify-center gap-2'>
-                  <p className='text-base text-learn-500 font-medium'>
-                    Pl. {card.plural}
-                  </p>
+                  <p className='text-xl text-learn-600 font-medium'>{card.greekWord || card.question}</p>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      speakGreek(card.plural || " ")
-                    }}
-                    className='p-1 rounded-full hover:bg-learn-100 transition-colors'
-                    title='Ecouter le pluriel'
+                    onClick={(e) => { e.stopPropagation(); speakGreek(card.greekWord || card.question) }}
+                    className='p-1.5 rounded-full hover:bg-learn-100 transition-colors'
                   >
-                    <Volume2 className='w-3.5 h-3.5 text-learn-400 hover:text-learn-600' />
+                    <Volume2 className='w-4 h-4 text-learn-400 hover:text-learn-600' />
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -10,9 +10,12 @@ export interface FlashCard {
   lastReviewed: Date | null
   nextReview: Date
   article?: string
+  greekWord?: string
   singular?: string
   plural?: string
-  greekWord?: string
+  masculine?: string
+  feminine?: string
+  neuter?: string
 }
 
 export interface Category {
