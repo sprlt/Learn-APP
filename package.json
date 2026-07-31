@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "flag-icons": "^7.5.0",
+    "framer-motion": "^12.0.0",
+    "lucide-react": "^0.460.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.0",
-    "framer-motion": "^12.0.0",
-    "lucide-react": "^0.460.0"
+    "react-simple-maps": "^3.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
